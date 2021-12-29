@@ -1,6 +1,5 @@
 package ru.vlados.groceries.tg.service;
 
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SetMyCommands;
@@ -11,16 +10,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
-import ru.vlados.groceries.configuration.TgProps;
 import ru.vlados.groceries.tg.client.TgClient;
 import ru.vlados.groceries.tg.commands.BasicCommand;
+import ru.vlados.groceries.tg.commands.CommandNotFound;
 import ru.vlados.groceries.tg.commands.HelpCommand;
 
 @Service
 @RequiredArgsConstructor
 public class TgService {
 
-    private final TgProps tgProps;
+    private final TgClient tgClient;
+    private final HelpCommand helpCommand;
+    private final CommandNotFound commandNotFound;
     private Map<String, BasicCommand> botCommandMap;
 
     @PostConstruct
@@ -31,14 +32,14 @@ public class TgService {
             .stream()
             .map(BasicCommand::getBotCommand)
             .toArray(BotCommand[]::new));
+        tgClient.createConnection();
     }
 
     public Flux<?> execute(Update update) {
-        System.out.println(update);
         return Flux.just(update)
             .map(this::validate)
             .map(arr -> arr[0])
-            .doOnNext(command -> botCommandMap.get(command).execute(update));
+            .doOnNext(command -> botCommandMap.getOrDefault(command, commandNotFound).execute(update));
     }
 
     private String[] validate(Update update) {
@@ -54,13 +55,13 @@ public class TgService {
     }
 
     private void initCommands() {
-        addCommand(new HelpCommand("/help", "What I can do"));
+        addCommand(this.helpCommand);
     }
 
     private void sendSetMyCommands(BotCommand[] commands) {
         SetMyCommands setMyCommands = new SetMyCommands(commands);
-        setMyCommands.languageCode(tgProps.getLanguageCode());
-        bot.execute(setMyCommands);
+//        setMyCommands.languageCode(tgProps.getLanguageCode());
+        tgClient.getBot().execute(setMyCommands);
     }
 
     private void addCommand(BasicCommand command) {

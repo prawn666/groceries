@@ -3,6 +3,7 @@ package ru.vlados.groceries.tg.commands;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.BotCommand;
+import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import java.io.IOException;
@@ -13,15 +14,21 @@ import ru.vlados.groceries.tg.client.TgClient;
 
 @Data
 @Slf4j
-public abstract class BasicCommand implements Command {
+public abstract class BasicCommand {
 
-    @Autowired
     protected TgClient tgClient;
     protected BotCommand botCommand;
 
     public BasicCommand(String command, String description) {
         this.botCommand = new BotCommand(command, description);
     }
+
+    @Autowired
+    public void setTgClient(TgClient tgClient) {
+        this.tgClient = tgClient;
+    }
+
+    public abstract void execute(Update update);
 
     protected void sendMessage(String text, long chatId) {
         TelegramBot bot = tgClient.getBot();

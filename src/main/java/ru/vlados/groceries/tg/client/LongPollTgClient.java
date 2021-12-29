@@ -7,8 +7,9 @@ import com.pengrad.telegrambot.request.DeleteWebhook;
 import com.pengrad.telegrambot.response.BaseResponse;
 import java.io.IOException;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,16 +20,20 @@ import ru.vlados.groceries.tg.controller.TgUpdatesController;
 @Slf4j
 @Service
 @Profile("local")
-@RequiredArgsConstructor
 public class LongPollTgClient implements TgClient {
 
     private final TgProps tgProps;
     private final TgUpdatesController controller;
     private TelegramBot bot;
 
+    public LongPollTgClient(@Autowired TgProps tgProps, @Lazy TgUpdatesController controller) {
+        this.tgProps = tgProps;
+        this.controller = controller;
+        this.bot = new TelegramBot(tgProps.getToken());
+    }
+
     @Override
     public TelegramBot createConnection() {
-        bot = new TelegramBot(tgProps.getToken());
         bot.setUpdatesListener(updates -> {
             updates.forEach(controller::processUpdate);
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -58,18 +63,4 @@ public class LongPollTgClient implements TgClient {
             }
         });
     }
-
-//    public  <T extends BaseRequest<T, R>, R extends BaseResponse> void kek(Command command, T request) {
-//        bot.execute(request, new Callback<T, R>() {
-//            @Override
-//            public void onResponse(T t, R r) {
-//                command.execute();
-//            }
-//
-//            @Override
-//            public void onFailure(T t, IOException e) {
-//
-//            }
-//        });
-//    }
 }
