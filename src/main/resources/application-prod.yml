@@ -1,0 +1,6 @@
+server.port: 8080
+
+tg:
+  token: 5049163150:AAGr_XabYU5Pm2Zzc46_pteWYMhGTZF3tEs
+  webhookUrl: 89.178.78.135:443/webhook
+  runMode: WEBHOOK
