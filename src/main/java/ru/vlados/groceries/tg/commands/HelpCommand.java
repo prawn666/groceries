@@ -13,7 +13,7 @@ public class HelpCommand extends BasicCommand{
     }
 
     @Override
-    public void execute(Update update) {
+    public void execute(Update update, String[] command) {
         this.sendMessage("/help - помощь (лена красивая) лулка лулечка сладкое колечко", update.message().chat().id()); //todo убрать
     }
 }
