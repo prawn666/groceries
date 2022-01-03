@@ -3,8 +3,8 @@ package ru.vlados.groceries.tg.service;
 import com.pengrad.telegrambot.model.Update;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -13,7 +13,7 @@ import ru.vlados.groceries.tg.commands.BasicCommand;
 @Service
 public class TgService {
 
-    @Getter
+    @Getter(value = AccessLevel.PACKAGE)
     private final Map<String, BasicCommand> botCommandMap = new HashMap<>();
 
     //todo add register action для лички шоб туда писать (регистер по коду с чата, ограничить время жизни кода) или же кидать chatid и проверять является ли чат мембером
@@ -22,8 +22,9 @@ public class TgService {
         return Flux.just(update)
             .map(this::validate)
             .map(this::mapToTextArr)
-            .doOnNext(command -> botCommandMap.getOrDefault(command[0], botCommandMap.get("/notFound"))
-                .execute(update, command));
+            .doOnNext(
+                command -> botCommandMap.getOrDefault(command[0], botCommandMap.get("/notFound"))
+                    .execute(update, command));
     }
 
     private Update validate(Update update) {

@@ -9,6 +9,7 @@ import com.pengrad.telegrambot.response.SendResponse;
 import java.io.IOException;
 import javax.annotation.PostConstruct;
 import lombok.Data;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.vlados.groceries.tg.client.TgClient;
@@ -18,10 +19,11 @@ import ru.vlados.groceries.tg.service.TgService;
 @Slf4j
 public abstract class BasicCommand {
 
-    protected TgClient tgClient;
-
     protected BotCommand botCommand;
+    @Setter(onMethod = @__({@Autowired}))
     protected TgService tgService;
+    @Setter(onMethod = @__({@Autowired}))
+    protected TgClient tgClient;
     //todo делать как бины, сделать бин на регистрацию и при вызове конструктора регать
 
     public BasicCommand(String command, String description) {
@@ -31,16 +33,6 @@ public abstract class BasicCommand {
     @PostConstruct
     private void add() {
         tgService.addCommand(this);
-    }
-
-    @Autowired
-    public void setTgService(TgService tgService) {
-        this.tgService = tgService;
-    }
-
-    @Autowired
-    public void setTgClient(TgClient tgClient) {
-        this.tgClient = tgClient;
     }
 
     public abstract void execute(Update update, String[] command);

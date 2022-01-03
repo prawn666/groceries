@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: app
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+    networks:
+      - groceries-network
+
+  postgres:
+    image: postgres:14.1-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: groceries
+      POSTGRES_PASSWORD: groceries
+      POSTGRES_USER: groceries
+#    volumes:
+#      - data:/var/lib/postgresql/data/
+    networks:
+      - groceries-network
+
+networks:
+  groceries-network:
+    name: groceries

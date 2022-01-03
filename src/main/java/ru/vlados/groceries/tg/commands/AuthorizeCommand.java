@@ -14,7 +14,7 @@ public class AuthorizeCommand extends BasicCommand {
 
     @Autowired
     public AuthorizeCommand() {
-        super("/auth", "авторизация");
+        super("/auth", "authorization");
     }
 
     @Autowired
@@ -32,7 +32,9 @@ public class AuthorizeCommand extends BasicCommand {
             new Callback<GetChatMember, GetChatMemberResponse>() {
                 @Override
                 public void onResponse(GetChatMember request, GetChatMemberResponse response) {
-                    sendMessage("Вы зарегистрированы в группе", update.message().chat().id());
+                    if (response.isOk()) {
+                        sendMessage("Вы зарегистрированы в группе", update.message().chat().id());
+                    } else onFailure(request, null);
                 }
 
                 @Override

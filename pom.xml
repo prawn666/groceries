@@ -17,6 +17,7 @@
     <properties>
         <java.version>11</java.version>
         <java-telegram-bot-api.version>5.5.0</java-telegram-bot-api.version>
+        <start-class>ru.vlados.groceries.GroceriesApplication</start-class>
     </properties>
     <dependencies>
         <dependency>
@@ -52,13 +53,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
+                    <mainClass>ru.vlados.groceries.GroceriesApplication</mainClass>
                 </configuration>
+                <execution>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                </execution>
             </plugin>
         </plugins>
     </build>
