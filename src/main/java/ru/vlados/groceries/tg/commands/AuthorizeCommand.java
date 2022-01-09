@@ -34,6 +34,7 @@ public class AuthorizeCommand extends BasicCommand {
                 public void onResponse(GetChatMember request, GetChatMemberResponse response) {
                     if (response.isOk()) {
                         sendMessage("Вы зарегистрированы в группе", update.message().chat().id());
+
                     } else onFailure(request, null);
                 }
 

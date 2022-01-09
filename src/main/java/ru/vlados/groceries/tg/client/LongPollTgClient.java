@@ -1,6 +1,7 @@
 package ru.vlados.groceries.tg.client;
 
 import com.pengrad.telegrambot.Callback;
+import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.request.DeleteWebhook;
@@ -34,16 +35,21 @@ public class LongPollTgClient implements TgClient {
 
     @Override
     public TelegramBot createConnection() {
-        bot.setUpdatesListener(updates -> {
-            updates.forEach(controller::processUpdate);
-            return UpdatesListener.CONFIRMED_UPDATES_ALL;
-        }, e -> {
+        setUpdateListener(e -> {
             if (HttpStatus.CONFLICT.value() == e.response().errorCode()) {
                 deleteWebhook(bot);
+                setUpdateListener(e2 -> log.error("Error getting updates after delete webhook", e2));
             }
             log.error("Error getting updates", e);
         });
         return bot;
+    }
+
+    private void setUpdateListener(ExceptionHandler exceptionHandler) {
+        bot.setUpdatesListener(updates -> {
+            updates.forEach(controller::processUpdate);
+            return UpdatesListener.CONFIRMED_UPDATES_ALL;
+        }, exceptionHandler);
     }
 
     private void deleteWebhook(TelegramBot bot) {
@@ -53,7 +59,6 @@ public class LongPollTgClient implements TgClient {
             public void onResponse(DeleteWebhook deleteWebhook, BaseResponse baseResponse) {
                 log.info("Deleted webhook {}, response {}",
                     deleteWebhook.toWebhookResponse(), baseResponse.toString());
-                createConnection();
             }
 
             @Override
