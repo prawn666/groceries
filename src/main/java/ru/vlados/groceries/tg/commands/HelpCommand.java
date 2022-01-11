@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Getter
 @Component
-public class HelpCommand extends BasicCommand{
+public class HelpCommand extends BasicCommand {
 
     public HelpCommand() {
         super("/help", "What I can do");
@@ -14,6 +14,7 @@ public class HelpCommand extends BasicCommand{
 
     @Override
     public void execute(Update update, String[] command) {
-        this.sendMessage("/help - помощь (лена красивая) лулка лулечка сладкое колечко", update.message().chat().id()); //todo убрать
+        this.sendMessage("/help - помощь (лена красивая) лулка лулечка сладкое колечко",
+            update.message().chat().id()); //todo убрать
     }
 }

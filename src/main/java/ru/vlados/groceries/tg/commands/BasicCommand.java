@@ -3,39 +3,22 @@ package ru.vlados.groceries.tg.commands;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.BotCommand;
-import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import java.io.IOException;
-import javax.annotation.PostConstruct;
-import lombok.Data;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.vlados.groceries.tg.client.TgClient;
-import ru.vlados.groceries.tg.service.TgService;
 
-@Data
 @Slf4j
-public abstract class BasicCommand {
+public abstract class BasicCommand implements Command {
 
     protected BotCommand botCommand;
-    @Setter(onMethod = @__({@Autowired}))
-    protected TgService tgService;
-    @Setter(onMethod = @__({@Autowired}))
     protected TgClient tgClient;
     //todo делать как бины, сделать бин на регистрацию и при вызове конструктора регать
 
     public BasicCommand(String command, String description) {
         this.botCommand = new BotCommand(command, description);
     }
-
-    @PostConstruct
-    private void add() {
-        tgService.addCommand(this);
-    }
-
-    public abstract void execute(Update update, String[] command);
 
     protected void sendMessage(String text, long chatId) {
         TelegramBot bot = tgClient.getBot();
@@ -52,5 +35,10 @@ public abstract class BasicCommand {
                 log.error("error in send message", e);
             }
         });
+    }
+
+    @Override
+    public BotCommand getBotCommand() {
+        return this.botCommand;
     }
 }

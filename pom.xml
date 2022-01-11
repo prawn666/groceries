@@ -18,13 +18,17 @@
         <java.version>11</java.version>
         <java-telegram-bot-api.version>5.5.0</java-telegram-bot-api.version>
         <start-class>ru.vlados.groceries.GroceriesApplication</start-class>
+        <postgresql.version>42.2.15</postgresql.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -45,6 +49,11 @@
             <artifactId>java-telegram-bot-api</artifactId>
             <version>${java-telegram-bot-api.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -55,11 +64,14 @@
                 <configuration>
                     <mainClass>ru.vlados.groceries.GroceriesApplication</mainClass>
                 </configuration>
-                <execution>
-                    <goals>
-                        <goal>repackage</goal>
-                    </goals>
-                </execution>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>16</source>
+                    <target>16</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>

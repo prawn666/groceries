@@ -1,13 +1,13 @@
 package ru.vlados.groceries.tg.commands;
 
 import com.pengrad.telegrambot.Callback;
+import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.GetChatMember;
 import com.pengrad.telegrambot.response.GetChatMemberResponse;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.vlados.groceries.tg.service.TgService;
 
 @Component
 public class AuthorizeCommand extends BasicCommand {
@@ -15,11 +15,6 @@ public class AuthorizeCommand extends BasicCommand {
     @Autowired
     public AuthorizeCommand() {
         super("/auth", "authorization");
-    }
-
-    @Autowired
-    public void setTgService(TgService tgService) {
-        this.tgService = tgService;
     }
 
     @Override
@@ -34,8 +29,9 @@ public class AuthorizeCommand extends BasicCommand {
                 public void onResponse(GetChatMember request, GetChatMemberResponse response) {
                     if (response.isOk()) {
                         sendMessage("Вы зарегистрированы в группе", update.message().chat().id());
-
-                    } else onFailure(request, null);
+                    } else {
+                        onFailure(request, null);
+                    }
                 }
 
                 @Override
@@ -45,4 +41,10 @@ public class AuthorizeCommand extends BasicCommand {
             });
 
     }
+
+    @Override
+    public BotCommand getBotCommand() {
+        return botCommand;
+    }
+
 }
