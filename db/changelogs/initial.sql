@@ -11,9 +11,10 @@ CREATE TABLE groups
 
 CREATE TABLE users
 (
-    id         BIGSERIAL PRIMARY KEY,
-    user_id    BIGINT UNIQUE,
-    created_at TIMESTAMP WITH TIME ZONE
+    id           BIGSERIAL PRIMARY KEY,
+    user_id      BIGINT UNIQUE,
+    active_group BIGINT,
+    created_at   TIMESTAMP WITH TIME ZONE
 );
 
 CREATE TABLE group_members
@@ -24,3 +25,12 @@ CREATE TABLE group_members
     created_at TIMESTAMP WITH TIME ZONE,
     UNIQUE (user_id, group_id)
 );
+
+-- todo один список общий а другой список временный (с добавлением в общий или нет)
+CREATE TABLE grocery_list
+(
+    id         BIGSERIAL PRIMARY KEY,
+    list       JSONB DEFAULT '{}'::jsonb,
+    group_id   BIGINT REFERENCES groups (group_id),
+    created_at TIMESTAMP WITH TIME ZONE
+)

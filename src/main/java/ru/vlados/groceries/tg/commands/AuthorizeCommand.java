@@ -1,20 +1,33 @@
 package ru.vlados.groceries.tg.commands;
 
 import com.pengrad.telegrambot.Callback;
-import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.GetChatMember;
 import com.pengrad.telegrambot.response.GetChatMemberResponse;
 import java.io.IOException;
+import java.time.Instant;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
+import ru.vlados.groceries.repository.dto.Group;
+import ru.vlados.groceries.repository.dto.GroupMember;
+import ru.vlados.groceries.repository.dto.User;
 
+@Slf4j
 @Component
 public class AuthorizeCommand extends BasicCommand {
 
+    private final R2dbcEntityTemplate template;
+
     @Autowired
-    public AuthorizeCommand() {
+    //todo при добавлении в группу регать ее
+    public AuthorizeCommand(R2dbcEntityTemplate template) {
         super("/auth", "authorization");
+        this.template = template;
     }
 
     @Override
@@ -23,28 +36,67 @@ public class AuthorizeCommand extends BasicCommand {
         Long userId = update.message().from().id();
         GetChatMember getChatMember = new GetChatMember(chatId, userId);
 
-        tgClient.getBot().execute(getChatMember,
-            new Callback<GetChatMember, GetChatMemberResponse>() {
-                @Override
-                public void onResponse(GetChatMember request, GetChatMemberResponse response) {
-                    if (response.isOk()) {
-                        sendMessage("Вы зарегистрированы в группе", update.message().chat().id());
-                    } else {
-                        onFailure(request, null);
-                    }
-                }
-
-                @Override
-                public void onFailure(GetChatMember request, IOException e) {
-                    sendMessage("Пользователь не найдет в группе ", update.message().chat().id());
-                }
-            });
-
+        Mono.<GetChatMemberResponse>create(consumer -> tgClient.getBot()
+                .execute(getChatMember, createCallback(update, consumer)))
+            .flatMap(response -> template.insert(createUserFromResponse(response, update))
+                .doOnError(this::onDuplicate)
+                .flatMap(user -> template.insert(createGroupFromUpdate(update)))
+                .flatMap(user -> template.insert(createGroupMemberFromResponse(response, update))))
+            .subscribe(
+                groupMember -> sendMessage("Вы зарегистрированы в группе",
+                    update.message().chat().id()));
     }
 
-    @Override
-    public BotCommand getBotCommand() {
-        return botCommand;
+    private Group createGroupFromUpdate(Update update) {
+        Group group = new Group();
+        group.setGroupId(update.message().chat().id());
+        group.setCreatedAt(Instant.now());
+        return group;
+    }
+
+    private void onDuplicate(Throwable throwable) {
+        if (throwable instanceof DataIntegrityViolationException) {
+            log.error("Duplicate");
+        }
+    }
+
+    private Callback<GetChatMember, GetChatMemberResponse> createCallback(Update update,
+        MonoSink<GetChatMemberResponse> consumer) {
+        return new Callback<>() {
+            @Override
+            public void onResponse(GetChatMember request, GetChatMemberResponse response) {
+                if (response.isOk()) {
+                    consumer.success(response);
+                } else {
+                    consumer.error(new RuntimeException(
+                        "Пользователь не найдет в группе " + update.message().chat().id()));
+                }
+            }
+
+            @Override
+            public void onFailure(GetChatMember request, IOException e) {
+                consumer.error(new RuntimeException(
+                    "Пользователь не найдет в группе " + update.message().chat().id()));
+            }
+        };
+    }
+
+    private GroupMember createGroupMemberFromResponse(GetChatMemberResponse response,
+        Update update) {
+        GroupMember groupMember = new GroupMember();
+        groupMember.setUserId(response.chatMember().user().id());
+        groupMember.setGroupId(update.message().chat().id());
+        groupMember.setCreatedAt(Instant.now());
+        return groupMember;
+    }
+
+    private User createUserFromResponse(GetChatMemberResponse response,
+        Update update) {
+        User user = new User();
+        user.setUserId(response.chatMember().user().id());
+        user.setCreatedAt(Instant.now());
+        user.setActiveGroup(update.message().chat().id());
+        return user;
     }
 
 }

@@ -4,9 +4,9 @@ tg:
   token: 5049163150:AAGr_XabYU5Pm2Zzc46_pteWYMhGTZF3tEs
   webhookUrl: 89.178.78.135:443/webhook
   runMode: LONG_POLL
+
 spring:
-  datasource:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/groceries
+  r2dbc:
+#    url: r2dbc:postgresql://localhost:5432/groceries
     username: groceries
     password: groceries

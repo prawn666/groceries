@@ -1,16 +1,17 @@
 package ru.vlados.groceries.repository.dto;
 
 import java.time.Instant;
+import java.util.List;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Data
-@Table("users")
-public class User {
+@Table
+public class GroceryList {
 
     @Id private long id;
-    private long userId;
-    private long activeGroup;
+    private long groupId;
+    private List<Grocery> groceryList;
     private Instant createdAt;
 }

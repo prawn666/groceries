@@ -6,11 +6,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Data
-@Table("users")
-public class User {
+@Table("groups")
+public class Group {
 
     @Id private long id;
-    private long userId;
-    private long activeGroup;
+    private long groupId;
     private Instant createdAt;
 }

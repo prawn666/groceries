@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
-import ru.vlados.groceries.tg.commands.CommandProcessor;
+import ru.vlados.groceries.tg.commands.processor.CommandProcessor;
 
 @Service
 @RequiredArgsConstructor

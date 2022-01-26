@@ -1,4 +1,4 @@
-package ru.vlados.groceries.tg.commands;
+package ru.vlados.groceries.tg.commands.processor;
 
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.request.SetMyCommands;
@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.vlados.groceries.tg.client.TgClient;
+import ru.vlados.groceries.tg.commands.Command;
 
 @Service
 public class CommandProcessor {
