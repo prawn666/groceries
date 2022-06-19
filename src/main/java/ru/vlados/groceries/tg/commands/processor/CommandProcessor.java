@@ -2,13 +2,18 @@ package ru.vlados.groceries.tg.commands.processor;
 
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.request.SetMyCommands;
+
 import java.util.HashMap;
 import java.util.List;
+
+import com.pengrad.telegrambot.response.BaseResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.vlados.groceries.tg.client.TgClient;
 import ru.vlados.groceries.tg.commands.Command;
 
+@Slf4j
 @Service
 public class CommandProcessor {
 
@@ -23,9 +28,11 @@ public class CommandProcessor {
         commandList.forEach(command -> commands.put(command.getBotCommand().command(), command));
 
         sendSetMyCommands(commands.values()
-            .stream()
-            .map(Command::getBotCommand)
-            .toArray(BotCommand[]::new));
+                .stream()
+                //tg doesnt allow /notFound
+                .map(Command::getBotCommand)
+                .filter(botCommand -> !botCommand.command().equalsIgnoreCase("/notFound"))
+                .toArray(BotCommand[]::new));
         tgClient.createConnection();
     }
 
@@ -35,7 +42,9 @@ public class CommandProcessor {
 
     private void sendSetMyCommands(BotCommand[] commands) {
         SetMyCommands setMyCommands = new SetMyCommands(commands);
-        tgClient.getBot().execute(setMyCommands);
+        setMyCommands.languageCode("en");
+        final BaseResponse responseFromSetMyCommands = tgClient.getBot().execute(setMyCommands);
+        log.info("Got response from setMyCommands: {}", responseFromSetMyCommands);
     }
 
 }

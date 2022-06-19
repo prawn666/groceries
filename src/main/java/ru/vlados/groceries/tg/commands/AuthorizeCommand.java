@@ -4,13 +4,17 @@ import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.GetChatMember;
 import com.pengrad.telegrambot.response.GetChatMemberResponse;
+
 import java.io.IOException;
 import java.time.Instant;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 import ru.vlados.groceries.repository.dto.Group;
@@ -31,20 +35,20 @@ public class AuthorizeCommand extends BasicCommand {
     }
 
     @Override
-    public void execute(Update update, String[] command) {
+    public Flux<?> execute(Update update, String[] command) {
         String chatId = command[1];
         Long userId = update.message().from().id();
         GetChatMember getChatMember = new GetChatMember(chatId, userId);
 
-        Mono.<GetChatMemberResponse>create(consumer -> tgClient.getBot()
-                .execute(getChatMember, createCallback(update, consumer)))
-            .flatMap(response -> template.insert(createUserFromResponse(response, update))
-                .doOnError(this::onDuplicate)
-                .flatMap(user -> template.insert(createGroupFromUpdate(update)))
-                .flatMap(user -> template.insert(createGroupMemberFromResponse(response, update))))
-            .subscribe(
-                groupMember -> sendMessage("Вы зарегистрированы в группе",
-                    update.message().chat().id()));
+        return Flux.<GetChatMemberResponse>create(consumer -> tgClient.getBot()
+                        .execute(getChatMember, createCallback(update, consumer)))
+                .flatMap(response -> template.insert(createUserFromResponse(response, update))
+                        .doOnError(this::onDuplicate)
+                        .flatMap(user -> template.insert(createGroupFromUpdate(update)))
+                        .flatMap(user -> template.insert(createGroupMemberFromResponse(response, update))))
+                .doOnNext(
+                        groupMember -> sendMessage("Вы зарегистрированы в группе",
+                                update.message().chat().id()));
     }
 
     private Group createGroupFromUpdate(Update update) {
@@ -61,28 +65,28 @@ public class AuthorizeCommand extends BasicCommand {
     }
 
     private Callback<GetChatMember, GetChatMemberResponse> createCallback(Update update,
-        MonoSink<GetChatMemberResponse> consumer) {
+                                                                          FluxSink<GetChatMemberResponse> consumer) {
         return new Callback<>() {
             @Override
             public void onResponse(GetChatMember request, GetChatMemberResponse response) {
                 if (response.isOk()) {
-                    consumer.success(response);
+                    consumer.next(response);
                 } else {
                     consumer.error(new RuntimeException(
-                        "Пользователь не найдет в группе " + update.message().chat().id()));
+                            "Пользователь не найдет в группе " + update.message().chat().id()));
                 }
             }
 
             @Override
             public void onFailure(GetChatMember request, IOException e) {
                 consumer.error(new RuntimeException(
-                    "Пользователь не найдет в группе " + update.message().chat().id()));
+                        "Пользователь не найден в группе " + update.message().chat().id()));
             }
         };
     }
 
     private GroupMember createGroupMemberFromResponse(GetChatMemberResponse response,
-        Update update) {
+                                                      Update update) {
         GroupMember groupMember = new GroupMember();
         groupMember.setUserId(response.chatMember().user().id());
         groupMember.setGroupId(update.message().chat().id());
@@ -91,7 +95,7 @@ public class AuthorizeCommand extends BasicCommand {
     }
 
     private User createUserFromResponse(GetChatMemberResponse response,
-        Update update) {
+                                        Update update) {
         User user = new User();
         user.setUserId(response.chatMember().user().id());
         user.setCreatedAt(Instant.now());

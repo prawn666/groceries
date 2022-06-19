@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   app:
@@ -10,7 +10,7 @@ services:
       - groceries-network
 
   postgres:
-    image: postgres:14.1-alpine
+    image: postgres:14.3-alpine
     container_name: postgres
     ports:
       - "5432:5432"
@@ -18,8 +18,8 @@ services:
       POSTGRES_DB: groceries
       POSTGRES_PASSWORD: groceries
       POSTGRES_USER: groceries
-#    volumes:
-#      - data:/var/lib/postgresql/data/
+    volumes:
+      - ./initdb.sh:/db/init/initdatabase.sql
     networks:
       - groceries-network
 

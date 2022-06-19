@@ -19,8 +19,7 @@ public class TgService {
         return Flux.just(update)
             .map(this::validate)
             .map(this::mapToTextArr)
-            .doOnNext(
-                command -> commandProcessor.getCommand(command[0])
+            .flatMap(command -> commandProcessor.getCommand(command[0])
                     .execute(update, command));
     }
 
