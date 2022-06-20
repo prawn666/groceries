@@ -16,11 +16,11 @@
     <description>groceries</description>
     <properties>
         <java.version>11</java.version>
-        <java-telegram-bot-api.version>5.6.0</java-telegram-bot-api.version>
+        <java-telegram-bot-api.version>6.0.1</java-telegram-bot-api.version>
         <start-class>ru.vlados.groceries.GroceriesApplication</start-class>
         <postgresql.version>42.2.15</postgresql.version>
-        <spring-data-r2dbc.version>1.4.1</spring-data-r2dbc.version>
-        <r2dbc-postgresql.version>0.9.0.M2</r2dbc-postgresql.version>
+        <spring-data-r2dbc.version>1.5.0</spring-data-r2dbc.version>
+        <r2dbc-postgresql.version>0.9.1.RELEASE</r2dbc-postgresql.version>
     </properties>
     <dependencies>
         <dependency>
@@ -60,6 +60,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>r2dbc-postgresql</artifactId>
             <version>${r2dbc-postgresql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+            <version>2.7.0</version>
         </dependency>
     </dependencies>
 

@@ -6,20 +6,24 @@ import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import java.io.IOException;
+
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.vlados.groceries.tg.client.TgClient;
 
+import javax.annotation.PostConstruct;
+
 @Slf4j
 public abstract class BasicCommand implements Command {
 
+    @Getter
     protected BotCommand botCommand;
-    @Autowired
     protected TgClient tgClient;
-    //todo делать как бины, сделать бин на регистрацию и при вызове конструктора регать
 
-    public BasicCommand(String command, String description) {
-        this.botCommand = new BotCommand(command, description);
+    @PostConstruct
+    private void setBotCommand() {
+        this.botCommand = new BotCommand(getCommand(), getDescription());
     }
 
     protected void sendMessage(String text, long chatId) {
@@ -37,10 +41,5 @@ public abstract class BasicCommand implements Command {
                 log.error("error in send message", e);
             }
         });
-    }
-
-    @Override
-    public BotCommand getBotCommand() {
-        return this.botCommand;
     }
 }

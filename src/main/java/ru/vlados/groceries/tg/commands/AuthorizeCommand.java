@@ -8,6 +8,7 @@ import com.pengrad.telegrambot.response.GetChatMemberResponse;
 import java.io.IOException;
 import java.time.Instant;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,15 +24,19 @@ import ru.vlados.groceries.repository.dto.User;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthorizeCommand extends BasicCommand {
 
     private final R2dbcEntityTemplate template;
 
-    @Autowired
-    //todo при добавлении в группу регать ее
-    public AuthorizeCommand(R2dbcEntityTemplate template) {
-        super("/auth", "authorization");
-        this.template = template;
+    @Override
+    public String getCommand() {
+        return "/auth";
+    }
+
+    @Override
+    public String getDescription() {
+        return "authorization";
     }
 
     @Override

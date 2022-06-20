@@ -9,8 +9,14 @@ import reactor.core.publisher.Flux;
 @Component
 public class HelpCommand extends BasicCommand {
 
-    public HelpCommand() {
-        super("/help", "What I can do");
+    @Override
+    public String getCommand() {
+        return "/help";
+    }
+
+    @Override
+    public String getDescription() {
+        return "What I can do";
     }
 
     @Override
