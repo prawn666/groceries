@@ -2,9 +2,11 @@ package ru.vlados.groceries.repository.dto;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
 @Data
-public class Grocery {
+@Table("grocery_items")
+public class GroceryItem {
 
     @Id
     private long id;

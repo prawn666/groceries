@@ -12,5 +12,6 @@ public class User {
     @Id private long id;
     private long userId;
     private long activeGroup;
+    private long currentListId;
     private Instant createdAt;
 }

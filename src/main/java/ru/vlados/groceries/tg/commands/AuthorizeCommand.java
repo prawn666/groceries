@@ -10,17 +10,15 @@ import java.time.Instant;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
 import ru.vlados.groceries.repository.dto.Group;
 import ru.vlados.groceries.repository.dto.GroupMember;
 import ru.vlados.groceries.repository.dto.User;
+import ru.vlados.groceries.tg.TgUtils;
 
 @Slf4j
 @Component
@@ -42,7 +40,7 @@ public class AuthorizeCommand extends BasicCommand {
     @Override
     public Flux<?> execute(Update update, String[] command) {
         String chatId = command[1];
-        Long userId = update.message().from().id();
+        Long userId = TgUtils.getUserId(update);
         GetChatMember getChatMember = new GetChatMember(chatId, userId);
 
         return Flux.<GetChatMemberResponse>create(consumer -> tgClient.getBot()

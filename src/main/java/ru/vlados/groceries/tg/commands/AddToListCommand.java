@@ -6,14 +6,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import ru.vlados.groceries.repository.db.GroceryItemsRepository;
-import ru.vlados.groceries.repository.dto.Grocery;
+import ru.vlados.groceries.repository.db.UserRepository;
+import ru.vlados.groceries.repository.dto.GroceryItem;
+import ru.vlados.groceries.tg.TgUtils;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AddToListCommand extends BasicCommand {
 
-    private final GroceryItemsRepository template;
+    private final GroceryItemsRepository groceryItemsRepository;
+    private final UserRepository userRepository;
 
     @Override
     public String getCommand() {
@@ -27,18 +30,20 @@ public class AddToListCommand extends BasicCommand {
 
     @Override
     public Flux<?> execute(Update update, String[] command) {
-        return Flux.just(createGrocery(command, update.message().chat().id()))
-                .flatMap(template::save)
+        return userRepository.getUserByUserId(TgUtils.getUserId(update))
+                .map(user -> createGrocery(command, user.getCurrentListId()))
+                .flatMap(groceryItemsRepository::save)
                 .map(row -> row)
+                .flux()
                 .doOnNext(row -> log.info(row.toString()));
     }
 
-    private Grocery createGrocery(String[] command, long listId) {
-        Grocery grocery = new Grocery();
-        grocery.setDone(false);
-        grocery.setName(command[1]);
-        grocery.setListId(listId);
-        return grocery;
+    private GroceryItem createGrocery(String[] command, long listId) {
+        GroceryItem groceryItem = new GroceryItem();
+        groceryItem.setDone(false);
+        groceryItem.setName(command[1]);
+        groceryItem.setListId(listId);
+        return groceryItem;
     }
 }
 

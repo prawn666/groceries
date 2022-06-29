@@ -14,6 +14,7 @@ create TABLE users
     id           BIGSERIAL PRIMARY KEY,
     user_id      BIGINT UNIQUE,
     active_group BIGINT,
+    current_list_id BIGINT REFERENCES grocery_list(id),
     created_at   TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
