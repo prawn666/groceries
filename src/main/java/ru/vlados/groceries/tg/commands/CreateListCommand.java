@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import ru.vlados.groceries.repository.db.GroceryListRepository;
+import ru.vlados.groceries.repository.dto.GroceryList;
 
 @Slf4j
 @Component
@@ -13,6 +15,7 @@ import reactor.core.publisher.Flux;
 public class CreateListCommand extends BasicCommand {
 
     private final DatabaseClient template2;
+    private final GroceryListRepository groceryListRepository;
 
     @Override
     public String getCommand() {
@@ -26,9 +29,10 @@ public class CreateListCommand extends BasicCommand {
 
     @Override
     public Flux<?> execute(Update update, String[] command) {
-        return template2.sql(String.format("INSERT INTO grocery_list(group_id) VALUES (%d) RETURNING", update.message().chat().id()))
-                .fetch()
-                .first()
+        final GroceryList entity = new GroceryList();
+        entity.setGroupId(update.message().chat().id());
+
+        return groceryListRepository.save(entity)
                 .flux()
                 .doOnNext(stringObjectMap -> sendMessage("Successfully created list with name %s", update.chatMember().chat().id()));
     }

@@ -1,14 +1,11 @@
 package ru.vlados.groceries.tg.commands;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pengrad.telegrambot.model.Update;
-import io.r2dbc.postgresql.codec.Json;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import ru.vlados.groceries.repository.db.GroceryListRepository;
+import ru.vlados.groceries.repository.db.GroceryItemsRepository;
 import ru.vlados.groceries.repository.dto.Grocery;
 
 @Slf4j
@@ -16,8 +13,7 @@ import ru.vlados.groceries.repository.dto.Grocery;
 @RequiredArgsConstructor
 public class AddToListCommand extends BasicCommand {
 
-    private final GroceryListRepository template;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final GroceryItemsRepository template;
 
     @Override
     public String getCommand() {
@@ -31,25 +27,17 @@ public class AddToListCommand extends BasicCommand {
 
     @Override
     public Flux<?> execute(Update update, String[] command) {
-        return Flux.just(createGrocery(command))
-                .map(this::mapToJson)
-                .flatMap(jsonGrocery -> template.update(Json.of(jsonGrocery), update.message().chat().id()))
+        return Flux.just(createGrocery(command, update.message().chat().id()))
+                .flatMap(template::save)
                 .map(row -> row)
                 .doOnNext(row -> log.info(row.toString()));
     }
 
-    private String mapToJson(Grocery grocery) {
-        try {
-            return objectMapper.writeValueAsString(grocery);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Grocery createGrocery(String[] command) {
+    private Grocery createGrocery(String[] command, long listId) {
         Grocery grocery = new Grocery();
         grocery.setDone(false);
         grocery.setName(command[1]);
+        grocery.setListId(listId);
         return grocery;
     }
 }

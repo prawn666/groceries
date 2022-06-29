@@ -48,11 +48,10 @@ public class AuthorizeCommand extends BasicCommand {
         return Flux.<GetChatMemberResponse>create(consumer -> tgClient.getBot()
                         .execute(getChatMember, createCallback(update, consumer)))
                 .flatMap(response -> template.insert(createUserFromResponse(response, update))
-                        .doOnError(this::onDuplicate)
                         .flatMap(user -> template.insert(createGroupFromUpdate(update)))
                         .flatMap(user -> template.insert(createGroupMemberFromResponse(response, update))))
-                .doOnNext(
-                        groupMember -> sendMessage("Вы зарегистрированы в группе",
+                .doOnError(this::onDuplicate)
+                .doOnNext(groupMember -> sendMessage("Вы зарегистрированы в группе",
                                 update.message().chat().id()));
     }
 
@@ -78,7 +77,7 @@ public class AuthorizeCommand extends BasicCommand {
                     consumer.next(response);
                 } else {
                     consumer.error(new RuntimeException(
-                            "Пользователь не найдет в группе " + update.message().chat().id()));
+                            "Пользователь не найден в группе " + update.message().chat().id()));
                 }
             }
 

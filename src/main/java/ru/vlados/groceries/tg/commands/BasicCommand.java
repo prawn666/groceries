@@ -19,6 +19,7 @@ public abstract class BasicCommand implements Command {
 
     @Getter
     protected BotCommand botCommand;
+    @Autowired
     protected TgClient tgClient;
 
     @PostConstruct

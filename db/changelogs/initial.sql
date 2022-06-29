@@ -2,35 +2,42 @@
 
 --changeset prawn666:init
 
-CREATE TABLE groups
+create TABLE groups
 (
     id         BIGSERIAL PRIMARY KEY,
     group_id   BIGINT UNIQUE,
-    created_at TIMESTAMP WITH TIME ZONE
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
-CREATE TABLE users
+create TABLE users
 (
     id           BIGSERIAL PRIMARY KEY,
     user_id      BIGINT UNIQUE,
     active_group BIGINT,
-    created_at   TIMESTAMP WITH TIME ZONE
+    created_at   TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
-CREATE TABLE group_members
+create TABLE group_members
 (
     id         BIGSERIAL PRIMARY KEY,
     user_id    BIGINT REFERENCES users (user_id),
     group_id   BIGINT REFERENCES groups (group_id),
-    created_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     UNIQUE (user_id, group_id)
 );
 
 -- todo один список общий а другой список временный (с добавлением в общий или нет)
-CREATE TABLE grocery_list
+create TABLE grocery_list
 (
     id         BIGSERIAL PRIMARY KEY,
-    list       JSONB DEFAULT '{}'::jsonb,
     group_id   BIGINT REFERENCES groups (group_id),
-    created_at TIMESTAMP WITH TIME ZONE
-)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+create TABLE grocery_items
+(
+    id              BIGSERIAL PRIMARY KEY,
+    name            VARCHAR,
+    done            BOOL,
+    list_id         BIGINT  REFERENCES grocery_list (id)
+);
