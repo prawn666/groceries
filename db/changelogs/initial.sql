@@ -9,11 +9,19 @@ create TABLE groups
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
+-- todo один список общий а другой список временный (с добавлением в общий или нет)
+create TABLE grocery_list
+(
+    id         BIGSERIAL PRIMARY KEY,
+    group_id   BIGINT REFERENCES groups (group_id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
 create TABLE users
 (
     id           BIGSERIAL PRIMARY KEY,
     user_id      BIGINT UNIQUE,
-    active_group BIGINT,
+    active_group BIGINT ,
     current_list_id BIGINT REFERENCES grocery_list(id),
     created_at   TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
@@ -25,14 +33,6 @@ create TABLE group_members
     group_id   BIGINT REFERENCES groups (group_id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     UNIQUE (user_id, group_id)
-);
-
--- todo один список общий а другой список временный (с добавлением в общий или нет)
-create TABLE grocery_list
-(
-    id         BIGSERIAL PRIMARY KEY,
-    group_id   BIGINT REFERENCES groups (group_id),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 create TABLE grocery_items

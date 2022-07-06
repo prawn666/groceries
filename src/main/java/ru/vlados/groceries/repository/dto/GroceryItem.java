@@ -9,9 +9,9 @@ import org.springframework.data.relational.core.mapping.Table;
 public class GroceryItem {
 
     @Id
-    private long id;
+    private Long id;
     private String name;
-    private boolean done;
-    private long listId;
+    private Boolean done;
+    private Long listId;
 
 }

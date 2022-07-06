@@ -10,7 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class GroupMember {
 
     @Id private long id;
-    private long userId;
-    private long groupId;
+    private Long userId;
+    private Long groupId;
     private Instant createdAt;
 }

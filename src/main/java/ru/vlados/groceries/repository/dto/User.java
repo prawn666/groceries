@@ -10,8 +10,8 @@ import org.springframework.data.relational.core.mapping.Table;
 public class User {
 
     @Id private long id;
-    private long userId;
-    private long activeGroup;
-    private long currentListId;
+    private Long userId;
+    private Long activeGroup;
+    private Long currentListId;
     private Instant createdAt;
 }
